@@ -1,0 +1,9 @@
+Package: com.frankfiorante.yticonswitcher
+Name: YTIconSwitcher
+Version: 1.0.0
+Architecture: iphoneos-arm64
+Description: Dynamically replace the YouTube app icon with custom assets.
+Maintainer: Frank Fiorante <develop@frankfiorante.com>
+Author: Frank Fiorante <develop@frankfiorante.com>
+Section: Tweaks
+Depends: mobilesubstrate, preferenceloader

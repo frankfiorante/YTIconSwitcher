@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>title</key>
+    <string>YTIconSwitcher</string>
+    <key>items</key>
+    <array>
+        <dict>
+            <key>cell</key>
+            <string>PSGroupCell</string>
+            <key>label</key>
+            <string>Icon Selection</string>
+        </dict>
+        <dict>
+            <key>cell</key>
+            <string>PSLinkListCell</string>
+            <key>label</key>
+            <string>Selected Icon</string>
+            <key>key</key>
+            <string>selectedIcon</string>
+            <key>default</key>
+            <string>default</string>
+            <key>validValues</key>
+            <array>
+                <string>default</string>
+                <string>dark</string>
+                <string>classic</string>
+                <string>amoled</string>
+                <string>minimal</string>
+            </array>
+            <key>validTitles</key>
+            <array>
+                <string>Default</string>
+                <string>Dark</string>
+                <string>Classic</string>
+                <string>AMOLED</string>
+                <string>Minimal</string>
+            </array>
+        </dict>
+        <dict>
+            <key>cell</key>
+            <string>PSGroupCell</string>
+            <key>label</key>
+            <string>Actions</string>
+        </dict>
+        <dict>
+            <key>cell</key>
+            <string>PSButtonCell</string>
+            <key>label</key>
+            <string>Refresh Icon Cache</string>
+            <key>action</key>
+            <string>refreshIconCache</string>
+        </dict>
+        <dict>
+            <key>cell</key>
+            <string>PSButtonCell</string>
+            <key>label</key>
+            <string>Respring</string>
+            <key>action</key>
+            <string>respringTapped</string>
+        </dict>
+        <dict>
+            <key>cell</key>
+            <string>PSGroupCell</string>
+            <key>label</key>
+            <string>Info</string>
+            <key>footerText</key>
+            <string>Place custom icons in:\n/var/mobile/Library/Application Support/YTIconSwitcher/icons/\n\nNaming: default.png, dark.png, classic.png, amoled.png, minimal.png\nRecommended size: 180×180px (PNG)</string>
+        </dict>
+    </array>
+</dict>
+</plist>
