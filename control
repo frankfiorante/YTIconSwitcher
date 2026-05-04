@@ -6,4 +6,4 @@ Description: Dynamically replace the YouTube app icon with custom assets.
 Maintainer: Frank Fiorante <develop@frankfiorante.com>
 Author: Frank Fiorante <develop@frankfiorante.com>
 Section: Tweaks
-Depends: mobilesubstrate, preferenceloader
+Depends: mobilesubstrate
