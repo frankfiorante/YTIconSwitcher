@@ -25,13 +25,13 @@ Place PNG files in:
 /var/mobile/Library/Application Support/YTIconSwitcher/icons/
 ```
 
-| Filename | Label in Settings |
-|---|---|
-| `default.png` | Default |
-| `dark.png` | Dark |
-| `classic.png` | Classic |
-| `amoled.png` | AMOLED |
-| `minimal.png` | Minimal |
+| Filename      | Label in Settings |
+|---------------|-------------------|
+| `default.png` | Default           |
+| `dark.png`    | Dark              |
+| `classic.png` | Classic           |
+| `amoled.png`  | AMOLED            |
+| `minimal.png` | Minimal           |
 
 Recommended size: **180 × 180 px** (PNG, no transparency required).
 
