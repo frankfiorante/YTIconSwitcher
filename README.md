@@ -1,56 +1,53 @@
 # YTIconSwitcher
 
-Dynamically replace the YouTube app icon on a rootless jailbreak.
+Replace the YouTube app icon with custom PNG assets. Designed for IPA injection via [cyan](https://github.com/asdfzxcvbn/pyzule-rw).
 
 ## Requirements
 
-- iOS 15+ (rootless jailbreak, e.g. Dopamine / palera1n)
-- Theos with Logos
-- PreferenceLoader installed on device
+- iOS 15+
+- Theos with Logos (to build)
 
 ## Build
 
 ```bash
-export THEOS=/opt/theos          # adjust to your Theos path
-make package FINALPACKAGE=1
+export THEOS=/opt/theos    # adjust to your Theos path
+make package DEBUG=0 FINALPACKAGE=1 THEOS_PACKAGE_SCHEME=rootless
 ```
 
 The `.deb` will be in `packages/`.
 
-## Install icons
+## Inject into an IPA
 
-Place PNG files in:
+Pass the built `.deb` to cyan along with your other tweaks:
 
+```bash
+cyan -i YouTube.ipa -o YouTube_patched.ipa -uwef yticonswitcher.deb
 ```
-/var/mobile/Library/Application Support/YTIconSwitcher/icons/
-```
 
-| Filename      | Label in Settings |
-|---------------|-------------------|
-| `default.png` | Default           |
-| `dark.png`    | Dark              |
-| `classic.png` | Classic           |
-| `amoled.png`  | AMOLED            |
-| `minimal.png` | Minimal           |
+The `-f` flag (`UIFileSharingEnabled`) is required — it is what makes the icon folder visible in Finder.
 
-Recommended size: **180 × 180 px** (PNG, no transparency required).
+## Add icons
 
-## Usage
+On the iPhone directly (no Mac needed):
 
-1. Open **Settings → YTIconSwitcher**.
-2. Pick an icon.
-3. Tap **Refresh Icon Cache**, then **Respring** if the home-screen icon does not update.
+1. Open the **Files** app.
+2. Browse → **On My iPhone → YouTube**.
+3. Open (or create) the **YTIconSwitcher** folder.
+4. Drop any number of **180 × 180 px PNG** files in — the filename (minus `.png`) becomes the label shown in the picker.
+
+PNGs can come from Safari downloads, iCloud Drive, AirDrop, or anywhere else Files can reach.
+
+Alternatively, via a Mac:
+
+1. Open **Finder**, select your device → **Files** → **YouTube**.
+2. Drop PNGs into the **YTIconSwitcher** folder.
+
+## Change the icon
+
+Open YouTube and tap the **palette button** (🎨) in the top-right of the home screen nav bar. An action sheet lists every PNG found in the `YTIconSwitcher` folder. Tap one to apply it — the change takes effect immediately, no restart needed.
 
 ## How it works
 
-- `Tweak.x` hooks `UIImage +imageNamed:` and `NSBundle -pathForResource:ofType:`.
-- Only calls whose asset name matches a known icon set (AppIcon*, YTLogo, etc.) are intercepted — all other image requests pass through untouched.
-- The selected icon name is read from `com.frankfiorante.yticonswitcher.plist` and the resolved `UIImage` is cached for the process lifetime; cache is cleared on preference change via Darwin notification.
-- Preference bundle live-notifies the tweak so the icon updates immediately inside a running YouTube session.
-
-## Stretch features (not yet implemented)
-
-- Random icon per day
-- Dark-mode adaptive icon
-- Theme packs
-- Per-version fallback
+- Hooks `UIImage +imageNamed:` and `NSBundle -pathForResource:ofType:` to intercept YouTube's icon asset lookups. Only names in a known set (`AppIcon*`, `YTLogo`, `UIApplicationIcon`) are redirected — all other image calls pass through untouched.
+- The selected icon name is persisted to `Documents/YTIconSwitcher.plist`. In-memory state and the image cache update immediately on selection.
+- The settings button is injected into `YTRightNavigationButtons` using `YTQTMButton`, the same approach used by iSponsorBlock.
