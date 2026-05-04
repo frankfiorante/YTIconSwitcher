@@ -158,8 +158,20 @@ compatibleWithTraitCollection:(UITraitCollection *)tc {
 
 %end
 
+// ─── YouTube class declarations ───────────────────────────────────────────────
+
+@interface YTQTMButton : UIButton
++ (instancetype)iconButton;
+- (void)enableNewTouchFeedback;
+@end
+
+@interface YTRightNavigationButtons : UIView
+- (NSMutableArray *)buttons;
+- (NSMutableArray *)visibleButtons;
+- (void)setLeadingPadding:(CGFloat)padding;
+@end
+
 // ─── Settings button in YouTube's navigation bar ──────────────────────────────
-// Follows the same pattern as iSponsorBlock (JustSettings group).
 
 %hook YTRightNavigationButtons
 %property (retain, nonatomic) YTQTMButton *ytisButton;
