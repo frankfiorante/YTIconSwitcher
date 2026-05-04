@@ -1,5 +1,6 @@
 #import <UIKit/UIKit.h>
 #import <Foundation/Foundation.h>
+#import <objc/runtime.h>
 
 #define PREF_ICON_KEY  @"selectedIcon"
 #define ICONS_SUBDIR   @"YTIconSwitcher"
@@ -7,7 +8,7 @@
 
 // ─── State ────────────────────────────────────────────────────────────────────
 
-static NSString *sSelectedIcon = nil;
+static NSString *sSelectedIcon = @"default";
 static UIImage  *sCachedImage  = nil;
 
 static NSSet<NSString *> *iconAssetNames(void) {
@@ -121,6 +122,8 @@ static void presentIconPicker(UIViewController *from) {
 
 // ─── Core hooks ───────────────────────────────────────────────────────────────
 
+%group SystemHooks
+
 %hook UIImage
 
 + (UIImage *)imageNamed:(NSString *)name {
@@ -147,7 +150,8 @@ compatibleWithTraitCollection:(UITraitCollection *)tc {
 
 - (NSString *)pathForResource:(NSString *)name ofType:(NSString *)ext {
     if (name && [iconAssetNames() containsObject:name] &&
-        (!ext || [ext.lowercaseString isEqualToString:@"png"])) {
+        (!ext || [ext.lowercaseString isEqualToString:@"png"]) &&
+        sSelectedIcon && ![sSelectedIcon isEqualToString:@"default"]) {
         NSString *path = [[iconsDirPath() stringByAppendingPathComponent:sSelectedIcon]
                           stringByAppendingPathExtension:@"png"];
         if ([[NSFileManager defaultManager] fileExistsAtPath:path])
@@ -157,6 +161,8 @@ compatibleWithTraitCollection:(UITraitCollection *)tc {
 }
 
 %end
+
+%end // SystemHooks
 
 // ─── YouTube class declarations ───────────────────────────────────────────────
 
@@ -169,37 +175,55 @@ compatibleWithTraitCollection:(UITraitCollection *)tc {
 - (NSMutableArray *)buttons;
 - (NSMutableArray *)visibleButtons;
 - (void)setLeadingPadding:(CGFloat)padding;
+- (YTQTMButton *)ytisButton;
+- (void)setYtisButton:(YTQTMButton *)button;
 @end
 
 // ─── Settings button in YouTube's navigation bar ──────────────────────────────
 
+static char kYTISButtonKey;
+
+%group YouTubeHooks
+
 %hook YTRightNavigationButtons
-%property (retain, nonatomic) YTQTMButton *ytisButton;
+
+%new
+- (YTQTMButton *)ytisButton {
+    return objc_getAssociatedObject(self, &kYTISButtonKey);
+}
+
+%new
+- (void)setYtisButton:(YTQTMButton *)button {
+    objc_setAssociatedObject(self, &kYTISButtonKey, button, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+}
 
 - (NSMutableArray *)buttons {
     NSMutableArray *retVal = %orig.mutableCopy;
-    [self.ytisButton removeFromSuperview];
-    [self addSubview:self.ytisButton];
 
     UIImage *img = [[UIImage systemImageNamed:@"swatchpalette.fill"]
                     imageWithTintColor:UIColor.labelColor
                     renderingMode:UIImageRenderingModeAlwaysOriginal];
 
     if (!self.ytisButton) {
-        self.ytisButton = [%c(YTQTMButton) iconButton];
+        YTQTMButton *btn = [%c(YTQTMButton) iconButton];
+        if (!btn) return retVal;
+        self.ytisButton = btn;
         [self.ytisButton enableNewTouchFeedback];
         self.ytisButton.frame = CGRectMake(0, 0, 40, 40);
         [self.ytisButton addTarget:self action:@selector(ytis_showPicker:)
                   forControlEvents:UIControlEventTouchUpInside];
         [retVal insertObject:self.ytisButton atIndex:0];
     }
+    [self.ytisButton removeFromSuperview];
+    [self addSubview:self.ytisButton];
     [self.ytisButton setImage:img forState:UIControlStateNormal];
     return retVal;
 }
 
 - (NSMutableArray *)visibleButtons {
     NSMutableArray *retVal = %orig.mutableCopy;
-    [self setLeadingPadding:-10];
+    if ([self respondsToSelector:@selector(setLeadingPadding:)])
+        [self setLeadingPadding:-10];
     if (self.ytisButton) {
         [self.ytisButton removeFromSuperview];
         [self addSubview:self.ytisButton];
@@ -217,9 +241,23 @@ compatibleWithTraitCollection:(UITraitCollection *)tc {
 
 %end
 
+%end // YouTubeHooks
+
 // ─── Init ─────────────────────────────────────────────────────────────────────
 
-%ctor {
+%hook UIApplication
+
+- (BOOL)application:(UIApplication *)app didFinishLaunchingWithOptions:(NSDictionary *)opts {
     reloadPrefs();
+    %init(SystemHooks);
+    if (%c(YTRightNavigationButtons) && %c(YTQTMButton)) {
+        %init(YouTubeHooks);
+    }
+    return %orig;
+}
+
+%end
+
+%ctor {
     %init;
 }
